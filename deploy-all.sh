@@ -132,7 +132,9 @@ sudo kubectl rollout status deployment/dashboard
 
 echo ""
 echo "Starting Blue-Green switch..."
-./switch-event-service.sh
+
+$PROJECT_DIR/switch-event-service.sh
+
 echo ""
 
 ##############################################
