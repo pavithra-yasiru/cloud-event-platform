@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: clickhouse
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: clickhouse
+
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+
+    spec:
+      containers:
+
+      - name: clickhouse
+
+        image: clickhouse/clickhouse-server:24.8
+
+        ports:
+          - containerPort: 8123
+          - containerPort: 9000
+
+        env:
+          - name: CLICKHOUSE_USER
+            value: admin
+
+          - name: CLICKHOUSE_PASSWORD
+            value: admin123
+
+          - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+            value: "1"
+
+        volumeMounts:
+          - name: clickhouse-storage
+            mountPath: /var/lib/clickhouse
+
+      volumes:
+        - name: clickhouse-storage
+          persistentVolumeClaim:
+            claimName: clickhouse-pvc

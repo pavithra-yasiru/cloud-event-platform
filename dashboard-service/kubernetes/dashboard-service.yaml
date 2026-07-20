@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: dashboard
+
+spec:
+  selector:
+    app: dashboard
+
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30086
+
+  type: NodePort

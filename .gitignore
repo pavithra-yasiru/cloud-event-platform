@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Docker archives
+*.tar
+
+# Environment files
+.env
+
+# Python cache
+.pytest_cache/
+
+# Bytecode
+*.egg-info/
+
+# Terraform (future proof)
+.terraform/
+
+# Kubernetes temp files
+*.tmp

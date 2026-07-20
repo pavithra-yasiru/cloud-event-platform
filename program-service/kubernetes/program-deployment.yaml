@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: program-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: program-service
+
+  template:
+    metadata:
+      labels:
+        app: program-service
+
+    spec:
+      containers:
+      - name: program-service
+        image: program-service:latest
+        imagePullPolicy: Never
+
+        ports:
+        - containerPort: 8000
