@@ -28,6 +28,22 @@ spec:
         ports:
         - containerPort: 8000
 
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+
         env:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:

@@ -27,3 +27,11 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+@app.get("/health", tags=["Health"])
+def health():
+    return {
+        "status": "healthy",
+        "service": "event-service",
+        "version": "1.0.0"
+    }

@@ -1,41 +1,34 @@
 #!/bin/bash
 
+set -e
+
 echo "=========================================="
 echo " Cloud Event Platform Deployment Script"
 echo "=========================================="
 
-set -e
+PROJECT_DIR=~/cloud-event-platform
 
 echo ""
 echo "Cleaning previous deployment archives..."
 
-find ~/cloud-event-platform -name "*.tar" -delete
+find $PROJECT_DIR -name "*.tar" -delete
 
-PROJECT_DIR=~/cloud-event-platform
-
-##############################################
+####################################################
 # Event Service (Blue-Green)
-##############################################
+####################################################
 
 echo ""
 echo "===== Deploying Event Service (Blue-Green) ====="
 
-cd $PROJECT_DIR/event-service
+cd $PROJECT_DIR
 
-sudo docker build -t event-service:latest .
-sudo docker save event-service:latest -o event-service.tar
-sudo k3s ctr images import event-service.tar
+chmod +x deploy-bluegreen.sh
 
-sudo kubectl apply -f kubernetes/event-blue-deployment.yaml
-sudo kubectl apply -f kubernetes/event-green-deployment.yaml
-sudo kubectl apply -f kubernetes/event-service-bluegreen.yaml
+./deploy-bluegreen.sh
 
-sudo kubectl rollout restart deployment/event-service-blue
-sudo kubectl rollout restart deployment/event-service-green
-
-##############################################
+####################################################
 # Program Service
-##############################################
+####################################################
 
 echo ""
 echo "===== Deploying Program Service ====="
@@ -47,11 +40,12 @@ sudo docker save program-service:latest -o program-service.tar
 sudo k3s ctr images import program-service.tar
 
 sudo kubectl apply -f kubernetes/program-deployment.yaml
-sudo kubectl rollout restart deployment program-service
+sudo kubectl rollout restart deployment/program-service
+sudo kubectl rollout status deployment/program-service
 
-##############################################
+####################################################
 # Registration Service
-##############################################
+####################################################
 
 echo ""
 echo "===== Deploying Registration Service ====="
@@ -63,11 +57,12 @@ sudo docker save registration-service:latest -o registration-service.tar
 sudo k3s ctr images import registration-service.tar
 
 sudo kubectl apply -f kubernetes/registration-deployment.yaml
-sudo kubectl rollout restart deployment registration-service
+sudo kubectl rollout restart deployment/registration-service
+sudo kubectl rollout status deployment/registration-service
 
-##############################################
+####################################################
 # Analytics Service
-##############################################
+####################################################
 
 echo ""
 echo "===== Deploying Analytics Service ====="
@@ -79,11 +74,12 @@ sudo docker save analytics-service:latest -o analytics-service.tar
 sudo k3s ctr images import analytics-service.tar
 
 sudo kubectl apply -f kubernetes/analytics-deployment.yaml
-sudo kubectl rollout restart deployment analytics-service
+sudo kubectl rollout restart deployment/analytics-service
+sudo kubectl rollout status deployment/analytics-service
 
-##############################################
+####################################################
 # Frontend
-##############################################
+####################################################
 
 echo ""
 echo "===== Deploying Frontend ====="
@@ -95,11 +91,12 @@ sudo docker save frontend:latest -o frontend.tar
 sudo k3s ctr images import frontend.tar
 
 sudo kubectl apply -f kubernetes/frontend-deployment.yaml
-sudo kubectl rollout restart deployment frontend
+sudo kubectl rollout restart deployment/frontend
+sudo kubectl rollout status deployment/frontend
 
-##############################################
+####################################################
 # Dashboard Service
-##############################################
+####################################################
 
 echo ""
 echo "===== Deploying Dashboard Service ====="
@@ -113,33 +110,12 @@ sudo k3s ctr images import dashboard.tar
 sudo kubectl apply -f kubernetes/dashboard-deployment.yaml
 sudo kubectl apply -f kubernetes/dashboard-service.yaml
 
-sudo kubectl rollout restart deployment dashboard
-
-##############################################
-# Wait for Rollout
-##############################################
-
-echo ""
-echo "===== Waiting for Deployments ====="
-
-sudo kubectl rollout status deployment/event-service-blue
-sudo kubectl rollout status deployment/event-service-green
-sudo kubectl rollout status deployment/program-service
-sudo kubectl rollout status deployment/registration-service
-sudo kubectl rollout status deployment/analytics-service
-sudo kubectl rollout status deployment/frontend
+sudo kubectl rollout restart deployment/dashboard
 sudo kubectl rollout status deployment/dashboard
 
-echo ""
-echo "Starting Blue-Green switch..."
-
-$PROJECT_DIR/switch-event-service.sh
-
-echo ""
-
-##############################################
+####################################################
 # Summary
-##############################################
+####################################################
 
 echo ""
 echo "===== Pods ====="
@@ -167,5 +143,6 @@ echo "  Analytics API : http://13.233.81.248:30085/docs"
 echo "  Metabase      : http://13.233.81.248:30087"
 echo "  Prometheus    : http://13.233.81.248:30089"
 echo "  Grafana       : http://13.233.81.248:30090"
+
 echo ""
-echo "Deployment completed."
+echo "Deployment completed successfully."
