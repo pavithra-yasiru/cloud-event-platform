@@ -14,11 +14,11 @@ find ~/cloud-event-platform -name "*.tar" -delete
 PROJECT_DIR=~/cloud-event-platform
 
 ##############################################
-# Event Service
+# Event Service (Blue-Green)
 ##############################################
 
 echo ""
-echo "===== Deploying Event Service ====="
+echo "===== Deploying Event Service (Blue-Green) ====="
 
 cd $PROJECT_DIR/event-service
 
@@ -26,8 +26,12 @@ sudo docker build -t event-service:latest .
 sudo docker save event-service:latest -o event-service.tar
 sudo k3s ctr images import event-service.tar
 
-sudo kubectl apply -f kubernetes/event-deployment.yaml
-sudo kubectl rollout restart deployment event-service
+sudo kubectl apply -f kubernetes/event-blue-deployment.yaml
+sudo kubectl apply -f kubernetes/event-green-deployment.yaml
+sudo kubectl apply -f kubernetes/event-service-bluegreen.yaml
+
+sudo kubectl rollout restart deployment/event-service-blue
+sudo kubectl rollout restart deployment/event-service-green
 
 ##############################################
 # Program Service
@@ -118,12 +122,18 @@ sudo kubectl rollout restart deployment dashboard
 echo ""
 echo "===== Waiting for Deployments ====="
 
-sudo kubectl rollout status deployment/event-service
+sudo kubectl rollout status deployment/event-service-blue
+sudo kubectl rollout status deployment/event-service-green
 sudo kubectl rollout status deployment/program-service
 sudo kubectl rollout status deployment/registration-service
 sudo kubectl rollout status deployment/analytics-service
 sudo kubectl rollout status deployment/frontend
 sudo kubectl rollout status deployment/dashboard
+
+echo ""
+echo "Starting Blue-Green switch..."
+./switch-event-service.sh
+echo ""
 
 ##############################################
 # Summary
@@ -152,7 +162,6 @@ echo "  Event API     : http://13.233.81.248:30081/docs"
 echo "  Program API   : http://13.233.81.248:30082/docs"
 echo "  Registration  : http://13.233.81.248:30084/docs"
 echo "  Analytics API : http://13.233.81.248:30085/docs"
-echo "  Metabase      : http://13.233.81.248:30087"
 echo "  Metabase      : http://13.233.81.248:30087"
 echo "  Prometheus    : http://13.233.81.248:30089"
 echo "  Grafana       : http://13.233.81.248:30090"
